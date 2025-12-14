@@ -1,0 +1,173 @@
+% Deep Learning Final Project — Self-Supervised Learning (Fall 2025)
+\documentclass[11pt]{article}
+
+% Basic packages
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{parskip}
+
+% Hyperref options
+\hypersetup{
+  colorlinks=true,
+  urlcolor=blue,
+  linkcolor=blue,
+  citecolor=blue
+}
+
+% Metadata and handy macros (edit as needed)
+\newcommand{\coursename}{Deep Learning}
+\newcommand{\term}{Fall 2025}
+\newcommand{\projecttitle}{Final Project: Self-Supervised Representation Learning}
+\newcommand{\instructor}{Instructor: [Your Name]}
+\newcommand{\releaseDate}{[Release: 2025-11-05]}
+\newcommand{\milestoneDate}{[Milestone: 2025-11-21]}
+\newcommand{\finalDue}{[Final Due: 2025-12-12]}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE \textbf{\projecttitle}}\\[4pt]
+  {\large \coursename\ (\term)}\\[4pt]
+  {\instructor}\\[2pt]
+  {\releaseDate\;\; | \;\; \milestoneDate\;\; | \;\; \finalDue}
+\end{center}
+
+\vspace{0.5em}
+\hrule
+\vspace{1em}
+
+\section*{Overview}
+In this project, you will design and implement a self-supervised learning (SSL) method to learn visual representations from a large unlabeled image corpus. You are encouraged to explore this as an open-ended research problem: propose algorithms, architectures, losses, optimization schemes, augmentations, or data pipelines. The final model must be fewer than \textbf{100M parameters}. All models must be \textbf{randomly initialized} (no pretraining or weights distilled from pretrained models).
+
+We will provide:
+\begin{itemize}[leftmargin=1.25em]
+  \item \textbf{Unlabeled Pretraining Set} (~500,000 images) for SSL.
+  \item \textbf{Public Downstream Evaluation Dataset} with a labeled split (train/val/test) for linear-probe evaluation only.
+  \item \textbf{Held-out Private Test Set} used by staff for final evaluation.
+\end{itemize}
+
+\textbf{Absolutely prohibited}: training on any public test images in any way. Violations receive a grade of 0 and an academic dishonesty report.
+
+\section*{Data and Splits}
+\paragraph{Unlabeled Pretraining Set (\texttt{pretrain/}).} Approximately 500k images for learning representations without labels. Use this set exclusively for SSL pretraining of your backbone.
+
+\paragraph{Public Downstream Evaluation (\texttt{eval\_public/}).} A labeled dataset for linear-probe evaluation of your learned features. Provided as:
+\begin{itemize}[leftmargin=1.25em]
+  \item \texttt{train/}: labeled images for training a \emph{linear} classifier on top of the \emph{frozen} backbone.
+  \item \texttt{val/}: labeled images for validation and hyperparameter tuning of the linear head only.
+  \item \texttt{test/}: images with hidden labels for public reporting.\footnote{You may extract features and run inference, but you may not update weights using these images.}
+\end{itemize}
+
+\paragraph{Private Held-out Test (\texttt{eval\_private/}).} A staff-only test set for final ranking and grading. You will submit your backbone and evaluation scripts; staff will run the linear probe and evaluation on this held-out set.
+
+\section*{Rules and Restrictions}
+\begin{enumerate}[leftmargin=1.25em]
+  \item \textbf{No training on test images.} You may not use \emph{any} \texttt{eval\_public/test} or \texttt{eval\_private} images for training, adaptation, distillation, feature bank construction, pseudo-labeling, or unsupervised updates. These images may only be used for forward-pass feature extraction and evaluation.
+  \item \textbf{Linear probing only on public labeled splits.} On \texttt{eval\_public}, you may train \emph{only a linear classification head} over a \emph{frozen} backbone. Train on \texttt{train}, tune on \texttt{val}, and report results on \texttt{test}. Do not use labels from \texttt{val} or \texttt{test} to update the backbone.
+  \item \textbf{Random initialization.} Initialize all model weights randomly. Do not load any pretrained weights (ImageNet, CLIP, DINO, etc.). No model soups, no partial initialization from pretrained backbones or heads, no distillation from external pretrained teachers.
+  \item \textbf{Model size $<100$M parameters.} Total parameters of the train-time backbone must be strictly below 100 million. We will verify programmatically.
+  \item \textbf{Data scope.} Use only the datasets provided. External data (labeled or unlabeled), external pseudo-labels, or metadata is not allowed. Synthetic data is allowed only if generated without pretrained vision models (e.g., pure procedural augmentations). Prior approval is required for any deviation.
+  \item \textbf{Test-time rules.} No test-time training/adaptation. Test-time augmentation (TTA) without learning is allowed. Feature whitening/normalization computed solely on training features is allowed; do not fit any statistics on test images.
+  \item \textbf{Teams.} Teams of 1--3 students. Larger teams must demonstrate proportional scope/rigor.
+\end{enumerate}
+
+\section*{Suggested Directions (Non-Exhaustive)}
+\begin{itemize}[leftmargin=1.25em]
+  \item \textbf{Contrastive/Instance Discrimination}: SimCLR, MoCo-v2/v3, InfoNCE variants, memory banks, queue designs.
+  \item \textbf{Redundancy Reduction}: BYOL, Barlow Twins, VICReg/VICRegL (EMA teacher allowed if randomly initialized).
+  \item \textbf{Clustering/Prototypical}: SwAV, DeepCluster-v2, online assignments, balanced prototypes.
+  \item \textbf{Masked Image Modeling}: MAE/SimMIM/iBOT-style masked prediction with lightweight decoders (respect parameter cap).
+  \item \textbf{Architectures}: ResNet-50/101, ConvNeXt-T/S, MobileOne, ViT-T/S (ensure $<100$M params). Explore normalization, activations, efficient blocks.
+  \item \textbf{Optimization / Data}: Advanced augmentations, multi-crop, schedules, EMA, regularization, curriculum; custom optimizers (e.g., LARS, AdamW variants).
+\end{itemize}
+
+\section*{Deliverables}
+\begin{description}[leftmargin=1.25em, style=nextline]
+  \item[Project Proposal (1--2 pages).] Problem framing, method sketch, architecture, compute plan, risk mitigation. Due: \milestoneDate.
+  \item[Checkpoint Update.] 2--3 slides or a 1-page memo: current results, ablations planned, blockers. Due: [2025-12-01].
+  \item[Final Report (6--8 pages).] Method, experiments, ablations, analysis, compute accounting, limitations/ethics, references. Due: \finalDue.
+  \item[Code and Artifacts.] Reproducible training and evaluation code; configs; pretrained backbone weights; logs; script to run linear probe; environment file.
+\end{description}
+
+\section*{Evaluation and Grading}
+\begin{itemize}[leftmargin=1.25em]
+  \item \textbf{Performance (Public Linear Probe)}: 30\%\quad Top-1 accuracy on \texttt{eval\_public/test} using a linear head trained on \texttt{train} and tuned on \texttt{val}.
+  \item \textbf{Performance (Private Held-out)}: 30\%\quad Staff-run linear probe on \texttt{eval\_private} with your backbone and scripts.
+  \item \textbf{Scientific Rigor / Analysis}: 20\%\quad Ablations, design justifications, sensitivity studies, clarity of empirical conclusions.
+  \item \textbf{Reproducibility / Code Quality}: 10\%\quad Clean code, deterministic runs, configuration management, documentation.
+  \item \textbf{Report Quality}: 10\%\quad Clarity, writing, figures/tables, related work positioning, limitations/ethics.
+\end{itemize}
+
+\paragraph{Ties and Statistical Reporting.} Report mean\,$\pm$\,std over at least 3 seeds for key results. Use fixed data splits. Staff may re-run to verify.
+
+\section*{Submission Instructions}
+All submissions use the provided template repository structure (released with the dataset):
+\begin{itemize}[leftmargin=1.25em]
+  \item \texttt{code/}: training and evaluation code (entry points: \texttt{train\_ssl.py}, \texttt{eval\_linear.py}).
+  \item \texttt{configs/}: YAML or JSON configs for experiments (pretraining, linear probe).
+  \item \texttt{scripts/}: \texttt{run\_pretrain.sh}, \texttt{run\_linear.sh} documented with arguments.
+  \item \texttt{artifacts/}: saved backbone weights (\texttt{backbone.pth}), logs, tensorboard, metrics.
+  \item \texttt{ENV.md} \& \texttt{requirements.txt}: exact versions and setup steps.
+  \item \texttt{REPORT.pdf}: final paper; \texttt{PROPOSAL.pdf}: proposal.
+\end{itemize}
+Upload a single archive or private repo link as instructed on the course platform.
+
+\section*{Reproducibility Checklist}
+\begin{enumerate}[leftmargin=1.25em]
+  \item Fixed seeds, determinism flags where feasible; record seeds in logs.
+  \item Exact data preprocessing and augmentations documented.
+  \item Full configuration files checked in; command lines to reproduce results.
+  \item Parameter count report (automated script provided by staff). Must be $<100$M.
+  \item Compute accounting: GPUs, hours, peak memory; any mixed precision usage.
+  \item Clear separation between SSL pretraining and linear probe stages.
+  \item No references to external data, models, or weights in code.
+\end{enumerate}
+
+\section*{Compliance and Auditing}
+We will run automated checks to enforce rules:
+\begin{itemize}[leftmargin=1.25em]
+  \item \textbf{Parameter cap.} Programmatic parameter counting on your backbone at train-time.
+  \item \textbf{Data usage.} File hash audits to ensure no \texttt{eval\_public/test} or \texttt{eval\_private} images are accessed during training. Logs must include dataset roots and counts.
+  \item \textbf{Backbone freezing.} Linear probe scripts must verify and assert that backbone gradients are disabled.
+  \item \textbf{Initialization.} Code review for checkpoints and weight loading; any pretrained loading is prohibited.
+\end{itemize}
+\textbf{Violations} result in a grade of 0 and an academic dishonesty report.
+
+\section*{Timeline (Tentative)}
+\begin{itemize}[leftmargin=1.25em]
+  \item Release (datasets, starter kit): \releaseDate
+  \item Proposal due: \milestoneDate
+  \item Checkpoint update: 2025-12-01
+  \item Final submission: \finalDue
+  \item Private evaluation and results posted: [2025-12-16]
+\end{itemize}
+
+\section*{FAQ (Abbreviated)}
+\textbf{Can we use CLIP/DINO/vit pretrained weights?} No. Random initialization only.
+
+\textbf{Can we use external unlabeled data?} No, unless explicitly approved in writing before training.
+
+\textbf{Is EMA teacher allowed?} Yes if all components start from random initialization and respect the parameter cap.
+
+\textbf{Can we tune the backbone with labels?} No. Linear probe only; backbone must remain frozen during supervised evaluation.
+
+\textbf{Can we adapt on test images without labels?} No. No learning of any kind on public/private test images.
+
+\textbf{Are we graded on speed?} Not directly. Report compute fairly; efficiency is appreciated.
+
+\section*{Academic Integrity}
+Follow the letter and spirit of the rules. Collaborate within your team; do not share code or weights across teams. Cite all external ideas and implementations you reference. Any attempt to train on test images, use pretrained weights, or otherwise circumvent the rules will be considered academic dishonesty and will result in a 0 for the project and a formal report.
+
+\vspace{1em}
+\hrule
+\vspace{0.5em}
+\noindent \textit{We are excited to see creative and rigorous approaches to self-supervised learning. Treat this as a research problem: be bold, careful, and scientific.}
+
+\end{document}
+
+

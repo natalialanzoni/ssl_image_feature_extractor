@@ -1,0 +1,41 @@
+{
+  "training": {
+    "epochs": 10000,
+    "batch_size": 256,
+    "lr": 0.0001,
+    "warmup_epochs": 20,
+    "scale_lr_by_batch": false,
+    "optimizer": "adam",
+    "momentum": 0.99,
+    "weight_decay": 1e-4,
+    "seed": 42
+  },
+  "model": {
+    "architecture": "convnext",
+    "feature_dim": 128,
+    "queue_size": 65536,
+    "temperature": 0.07,
+    "momentum": 0.99
+  },
+  "data": {
+    "dataset_name": "tsbpp/fall2025_deeplearning",
+    "dataset_subset": null,
+    "image_size": 96,
+    "zip_dir": "/cluster/synth/bruce/dataset_cache/zips",
+    "unzipped_dir": "/cluster/synth/bruce/dataset_cache/unzipped",
+    "reuse_unzipped": true,
+    "use_hf_loader": false,
+    "hf_cache_dir": null
+  },
+  "augmentation": {
+    "color_jitter": 0.6, 
+    "random_grayscale_prob": 0.2
+  },
+  "training_config": {
+    "num_workers": 8,
+    "output_dir": "./checkpoints_resnet_birds_adam_v2.convnext_res",
+    "name": "ADAM_CONVNEXT_RES",
+    "resume": "./checkpoints_resnet_birds_adam_v2.convnext/resnet_moco_latest.pt"
+  }
+}
+
