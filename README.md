@@ -2,6 +2,10 @@
 
 This repository contains code for training and evaluating self-supervised learning models using MoCo v2 (Momentum Contrast) framework.
 
+Different ResNet and ConvNeXt architetures are supported.
+
+The best performing model was a ConvNext_base evaluated on classifying 200 bird species, 200 ImageNet Classes, and 200 geographical locations.
+
 ## Project Structure
 
 ```
